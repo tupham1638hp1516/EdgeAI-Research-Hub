@@ -42,3 +42,9 @@ common Types of DoS Flooding Attack:
 
 User Datagram Protocol (UDP)
 
+
+
+Trước hết, ta có thể hiểu DoS flooding attacks là các cuộc tấn công nhằm bơm một lượng thông tin rác khổng lồ làm tắc nghẽn hệ thống mạng, và để ngăn chặn các cuộc tấn công này thì ta có IDS để phát hiện các cuộc tấn công. Vấn đề được đặt ra ở đây là các dataset hiện có không đủ khả năng để mô tả lại các cuộc tấn công ngoài đời thực.
+
+Và vì thế, mục tiêu của tác giả là tạo ra một tập dữ liệu toàn diện nhất, đó là SNMP-MIB dataset. Qua đó thì các nhà nghiên cứu khác có thể dùng chính dataset đó để phát triển các công cụ phát hiện xâm nhập một cách tốt nhất.
+
