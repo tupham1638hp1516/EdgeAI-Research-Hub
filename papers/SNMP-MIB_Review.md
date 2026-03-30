@@ -48,3 +48,31 @@ Trước hết, ta có thể hiểu DoS flooding attacks là các cuộc tấn c
 
 Và vì thế, mục tiêu của tác giả là tạo ra một tập dữ liệu toàn diện nhất, đó là SNMP-MIB dataset. Qua đó thì các nhà nghiên cứu khác có thể dùng chính dataset đó để phát triển các công cụ phát hiện xâm nhập một cách tốt nhất.
 
+
+
+\# Nhap qua
+
+Định nghĩ về SNMP-MIB dataset
+
+SNMP: Là một giao thức lớp ứng dụng phổ biến dùng để cấu hình, quản lý và thu thập thông tin từ các thiết bị mạng (như máy tính, bộ chuyển mạch, máy chủ, bộ định tuyến)
+
+MIB: Là một cơ sở dữ liệu đi kèm với SNMP, làm nhiệm vụ lưu trữ các thông số, trạng thái (hay còn gọi là các "biến đối tượng") của mạng. Khi mạng có hoạt động bất thường (như bị tấn công), các biến MIB cụ thể sẽ bị thay đổi.
+
+=> Dataset SNMP-MIB: Đây là kết quả cuối cùng—một bộ dữ liệu gồm 4.998 bản ghi. Mỗi bản ghi ghi lại giá trị của 34 biến MIB quan trọng nhất tại một thời điểm nhất định để xem chúng biến động thế nào khi bị tấn công.
+
+
+
+Các bước để tạp dataset:
+
+Bước 1: Thiết lập môi trường mạng thực: Tác giả xây dựng một mạng cục bộ biệt lập với Internet để đảm bảo tính chân thực, bao gồm 1 bộ định tuyến (router), 2 bộ chuyển mạch (switches) và 2 mạng con. Mạng con thứ nhất có 1 máy tính đóng vai trò Attacker; mạng con thứ hai có 1 máy tính làm Victim.
+
+Bước 2: Tạo lưu lượng mạng bình thường (Normal Traffic Generation): Sử dụng phần mềm LanTrafficV2 cài đặt trên các máy tính để tự động tạo ra các luồng dữ liệu (TCP, UDP, ICMP) qua lại giữa 2 mạng con. Lưu lượng bình thường được duy trì ở tốc độ lên tới 50 Mbps để giả lập một mạng đang hoạt động thực tế.
+
+Bước 3: Phát động các cuộc tấn công: Máy Attacker sử dụng hàng loạt công cụ mã nguồn mở để tấn công máy Victim bằng các kịch bản khác nhau
+
+Bước 4: Trong khi các cuộc tấn công đang diễn ra, một chương trình bằng ngôn ngữ Java sẽ "hỏi" bộ định tuyến cứ mỗi 15 giây một lần để chép lại 34 chỉ số MIB. Con số 15 giây được chọn vì nó đủ nhanh để bắt được dấu vết tấn công nhưng không làm máy móc bị quá tải.
+
+
+
+
+
