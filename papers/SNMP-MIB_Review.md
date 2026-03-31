@@ -10,11 +10,11 @@ tập dữ liệu SNMP-MIB/ SNMP-MIB Dataset
 
 các cuộc tấn công làm ngập lụt Từ chối dịch vụ (DoS)/ DoS flooding attacks
 
-Giao thức Quản lý Mạng Đơn giản (SNMP)/ Simple Network Management 
+Giao thức Quản lý Mạng Đơn giản (SNMP)/ Simple Network Management
 
 Protocol (SNMP)
 
-&#x20;Cơ sở Thông tin Quản lý (MIB)/  Management 
+&#x20;Cơ sở Thông tin Quản lý (MIB)/  Management
 
 Information Base (MIB)
 
@@ -44,21 +44,32 @@ User Datagram Protocol (UDP)
 
 
 
-Trước hết, ta có thể hiểu DoS flooding attacks là các cuộc tấn công nhằm bơm một lượng thông tin rác khổng lồ làm tắc nghẽn hệ thống mạng, và để ngăn chặn các cuộc tấn công này thì ta có IDS để phát hiện các cuộc tấn công. Vấn đề được đặt ra ở đây là các dataset hiện có không đủ khả năng để mô tả lại các cuộc tấn công ngoài đời thực.
-
-Và vì thế, mục tiêu của tác giả là tạo ra một tập dữ liệu toàn diện nhất, đó là SNMP-MIB dataset. Qua đó thì các nhà nghiên cứu khác có thể dùng chính dataset đó để phát triển các công cụ phát hiện xâm nhập một cách tốt nhất.
 
 
+Các nhà nghiên cứu đang gặp khó khăn do thiếu hụt các tập dữ liệu thực tế. Hầu hết các tập dữ liệu hiện có đều phụ thuộc vào các phương pháp tiếp cận dựa trên mô phỏng, vốn không thể thể hiện chính xác và đúng bản chất của các kịch bản xâm nhập và bất thường mạng. Ta có thể hiểu DoS flooding attacks là các cuộc tấn công nhằm bơm một lượng thông tin rác khổng lồ làm tắc nghẽn hệ thống mạng, và để ngăn chặn các cuộc tấn công này thì ta có IDS để phát hiện các cuộc tấn công. Vấn đề được đặt ra ở đây là các dataset hiện có không đủ khả năng để mô tả lại các cuộc tấn công ngoài đời thực.Vì vậy, việc tạo ra các tập dữ liệu thực tế là rất quan trọng vì nó cho phép đánh giá chính xác và thích hợp các kỹ thuật phát hiện
 
-\# Nhap qua
 
-Định nghĩ về SNMP-MIB dataset
 
-SNMP: Là một giao thức lớp ứng dụng phổ biến dùng để cấu hình, quản lý và thu thập thông tin từ các thiết bị mạng (như máy tính, bộ chuyển mạch, máy chủ, bộ định tuyến)
+Thay vì soi xét từng gói tin (packet) siêu nhỏ, việc này cực kỳ tốn tài nguyên và làm chậm hệ thống. Nhóm tác giả chọn cách tiếp cận theo hướng thống kê thông qua SNMP và MIB.
 
-MIB: Là một cơ sở dữ liệu đi kèm với SNMP, làm nhiệm vụ lưu trữ các thông số, trạng thái (hay còn gọi là các "biến đối tượng") của mạng. Khi mạng có hoạt động bất thường (như bị tấn công), các biến MIB cụ thể sẽ bị thay đổi.
 
-=> Dataset SNMP-MIB: Đây là kết quả cuối cùng—một bộ dữ liệu gồm 4.998 bản ghi. Mỗi bản ghi ghi lại giá trị của 34 biến MIB quan trọng nhất tại một thời điểm nhất định để xem chúng biến động thế nào khi bị tấn công.
+
+SNMP Là giao thức tầng ứng dụng dùng để quản lý và giám sát các thiết bị mạng (Router, Switch, Server...).
+
+\# Vai trò: Nó đóng vai trò thu thập thông tin từ các thiết bị, phát hiện các thông số bất thường
+
+
+
+MIB Là một cơ sở dữ liệu nằm trong thiết bị mạng, lưu trữ các biến số phản ánh trạng thái của thiết bị đó.
+
+\# Mỗi khi có một hoạt động bất kỳ, các biến số trong MIB sẽ thay đổi. Ví dụ: Nếu bị tấn công từ chối dịch vụ (DoS), số lượng gói tin ICMP hoặc lỗi IP sẽ tăng vọt.
+
+
+
+\### Vậy thành quả của tác giả có thể hiểu là:
+
+
+Thiết lập giải pháp khai thác dữ liệu thống kê từ SNMP-MIB để thay thế việc phân tích gói tin thô nặng nề. Họ đã tinh lọc và định danh bộ 34 biến MIB nhạy cảm nhất trong hàng ngàn biến số MIB có sẵn qua thuật toán đo độ lợi thông tin, giúp tối ưu hóa khả năng nhận diện tấn công đa tầng. Từ đó, nhóm xây dựng một mô hình thực nghiệm thực tế và bộ dữ liệu 4998 bản ghi chất lượng cao, chứng minh khả năng phát hiện xâm nhập một cách nhẹ nhàng và hiệu quả. Cuối cùng, nghiên cứu xác lập quy trình lấy mẫu 15 giây/lần là khoảng thời gian tối ưu để đảm bảo phát hiện nhanh các cuộc tấn công hiện đại mà không gây gánh nặng cho thiết bị mạng
 
 
 
@@ -82,7 +93,7 @@ Bước 4: Trong khi các cuộc tấn công đang diễn ra, một chương tr�
 
 Tác giả chọn bộ định tuyến (router) làm điểm thu thập dữ liệu vì đây là nút giao thông chính mà mọi luồng dữ liệu đều phải đi qua.
 
-Không có một thông số đơn lẻ nào đủ để phát hiện mọi loại tấn công. 
+Không có một thông số đơn lẻ nào đủ để phát hiện mọi loại tấn công.
 
 Thay vì theo dõi toàn bộ hệ thống gây quá tải, tác giả chỉ chọn lọc ra 34 thông số (biến MIB) quan trọng và nhạy cảm nhất.
 
@@ -93,4 +104,8 @@ Phân bổ: 34 thông số này được chia vào 5 nhóm cốt lõi (Interface
 Dữ liệu của 34 thông số này được đo bằng "bộ đếm 32" – tức là một dạng thông số chỉ cộng dồn liên tục tiến lên phía trước (từ 0 đến mức tối đa rồi mới quay vòng lại về 0).
 
 Cách phát hiện kẻ tấn công: Các thông số này chịu ảnh hưởng trực tiếp từ lưu lượng truyền tải trên mạng. Ở trạng thái bình thường, các con số này sẽ tăng lên một cách đều đặn. Tuy nhiên, khi có các cuộc tấn công ngập lụt, kẻ gian sẽ bơm một lượng dữ liệu rác khổng lồ vào hệ thống. Hệ quả là các thông số đo lường này sẽ gia tăng với tốc độ đột biến. Bằng cách theo dõi tốc độ tăng bất thường của 34 thông số này, hệ thống có thể nhận diện được ngay khi nào mạng đang bị tấn công.
+
+
+
+
 
