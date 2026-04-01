@@ -96,81 +96,57 @@ Dưới đây là một số ví dụ về DoS flooding attack:
 
 
 
-**Tấn công TCP-SYN:** Tấn công làm ngập lụt TCP SYN khai thác lỗ hổng của cơ chế bắt tay ba bước \[Đồng bộ hóa (SYN), SYN-ACK (Xác nhận), và ACK] được sử dụng giữa máy chủ (host) và máy chủ (server) để thiết lập kết nối.
-
-&#x20;Trong cuộc tấn công, kẻ tấn công gửi các gói SYN với địa chỉ IP nguồn không tồn tại đến máy chủ.
-
-&#x20;Máy chủ phản hồi lại một yêu cầu SYN bằng cách gửi SYN ACK, lưu trữ thông tin yêu cầu trong ngăn xếp bộ nhớ và chờ gói ACK từ máy khách.
-
-&#x20;Trong khi máy chủ chờ gói ACK từ máy khách, yêu cầu vẫn còn trong ngăn xếp bộ nhớ.
-
-&#x20;Máy chủ sẽ không nhận được các gói ACK vì địa chỉ IP nguồn đã giả mạo địa chỉ IP.
-
-&#x20;Nếu kẻ tấn công gửi nhiều yêu cầu SYN trong những khoảng thời gian rất ngắn, các yêu cầu sẽ lấp đầy toàn bộ ngăn xếp bộ nhớ và sau đó tài nguyên của máy chủ sẽ cạn kiệt, khiến máy chủ không thể phản hồi thêm các yêu cầu từ người dùng hợp pháp
+***# Tấn công vào lớp giao vận:***
 
 
 
-**Tấn công UDP Flood:** Loại tấn công này được gây ra bằng cách gửi hoặc làm ngập lụt các gói UDP hướng tới các cổng ngẫu nhiên của máy chủ.
+**Tấn công TCP-SYN:** 
 
-&#x20;Máy chủ mở gói tin và không tìm thấy gì trong đó, sau đó gửi lại gói tin không thể truy cập (unreachable) về đích.
+Cơ chế : Kẻ tấn công gửi hàng loạt gói tin SYN với địa chỉ IP giả mạo. Máy chủ phản hồi SYN-ACK và đưa kết nối vào trạng thái "Nửa mở" (Half-open) trong hàng đợi Backlog. Vì IP nguồn là giả, máy chủ không bao giờ nhận được gói ACK cuối cùng.
 
-&#x20;Bởi vì lượng lớn các gói UDP này, tài nguyên của nạn nhân (băng thông) sẽ bị cạn kiệt và có thể bận rộn phục vụ các yêu cầu này.
-
-&#x20;Điều này dẫn đến sự không khả dụng cho những người dùng hợp pháp.
-
-&#x20;Một cuộc tấn công ngập lụt UDP có thể hiệu quả hơn trong các mạng nhỏ hơn vì kích thước của các gói UDP là khổng lồ
+Hệ quả: Cạn kiệt Backlog Queue và bộ nhớ RAM. CPU bị bắt làm quá mức
 
 
 
-**Tấn công ICMP-ECHO:** Tấn công này tập trung vào việc làm ngập lụt băng thông của nạn nhân.
+**Tấn công UDP Flood:** 
 
-&#x20;Theo giao thức ICMP, khi một thiết bị trên mạng nhận được một yêu cầu “ping”, nó sẽ trả lời lại địa chỉ IP nguồn bằng một tin nhắn thông báo về trạng thái của thiết bị nhận.
+Cơ chế: Khác với TCP, UDP là giao thức phi kết nối. Vì UDP không cần thiết lập kết nối, các kẻ tấn công rất dễ gửi chúng đi, thậm chí là hàng triệu. Điều đáng lo ở đây là các gói UDP đó thường được gửi vào các cổng không có thật hoặc không có ứng dụng nào ở đó. Máy chủ thì lại phải phản hồi rất lâu: mở gói tin, kiểm tra ứng dụng, gửi một gói tin ICMP mới.
 
-&#x20;Trong cuộc tấn công này, kẻ tấn công chế tạo một số lượng lớn các gói ICMP với địa chỉ IP nguồn giả mạo giống với địa chỉ IP của nạn nhân và gửi chúng thông qua các yêu cầu ICMP echo tới một địa chỉ quảng bá (broadcast).
-
-&#x20;Tất cả các thiết bị trên mạng đã nhận được những yêu cầu này sẽ trả lời bằng tin nhắn gửi lại cho nạn nhân.
-
-&#x20;Cuối cùng, tất cả các tin nhắn trả lời sẽ làm cạn kiệt tài nguyên của nạn nhân.
-
-&#x20;Sức mạnh của một cuộc tấn công ICMP-ECHO phụ thuộc vào số lượng thiết bị nhận được các yêu cầu và tốc độ gói tin tấn công
+Hệ quả: Khi có hàng triệu gói UDP vô nghĩa, máy chủ dùng hết băng thông và CPU chỉ để gửi các gói ICMP thông báo ngược lại.
 
 
 
-**Tấn công HTTP Flood:** Tấn công này còn được gọi là tấn công làm ngập lụt HTTP GET/POST.
-
-&#x20;Nó cũng được coi là một cuộc tấn công không giả mạo.
-
-&#x20;Trong cuộc tấn công này, kẻ tấn công nhằm mục đích tấn công các máy chủ web và các ứng dụng để tiêu thụ một lượng lớn tài nguyên của nạn nhân.
-
-&#x20;Những kẻ tấn công gửi một lượng lớn các yêu cầu HTTP hợp lệ (get/post) đến một nạn nhân, như thể hiện trong Hình 3.
-
-&#x20;Những yêu cầu như vậy thường được gửi bởi mạng botnet, nơi mỗi bot có thể tạo ra một lượng lớn các yêu cầu hợp lệ (thường là hơn 10 yêu cầu một giây).
-
-&#x20;Tại đây, tốc độ yêu cầu kết nối phiên từ những kẻ tấn công cao hơn tốc độ yêu cầu kết nối phiên từ những người dùng bình thường.
-
-&#x20;Một cuộc tấn công làm ngập lụt HTTP có thể là một trong những mối đe dọa không dùng lỗ hổng lớn nhất mà các máy chủ web có thể gặp phải vì rất khó để phân biệt giữa lưu lượng HTTP độc hại và lưu lượng HTTP bình thường
+***# Tấn công vào Lớp mạng:***
 
 
 
-**Tấn công Slowloris:** Cuộc tấn công này còn được gọi là tấn công Slow Header.
+**Tấn công ICMP-ECHO:**
 
-Trong cuộc tấn công, kẻ tấn công với một địa chỉ IP không giả mạo sẽ gửi các phiên có yêu cầu khối lượng công việc cao.
+Cơ chế: Ngược lại với UDP Flood, kẻ tấn công chế tạo một số lượng lớn các gói ICMP với địa chỉ IP nguồn giả mạo giống với địa chỉ IP của nạn nhân và gửi chúng thông qua các yêu cầu ICMP echo tới một broadcast. Tất cả các thiết bị trên mạng đã nhận được những yêu cầu này sẽ trả lời bằng tin nhắn gửi lại cho nạn nhân,
 
-&#x20;Các yêu cầu này là các yêu cầu HTTP header một phần, cập nhật rất chậm, phát triển nhanh chóng và liên tục, và không bao giờ đóng lại.
-
-&#x20;Cuộc tấn công tiếp tục cho đến khi tất cả các socket kết nối có sẵn bị các yêu cầu này chiếm dụng, và máy chủ web trở nên không khả dụng đối với bất kỳ kết nối hợp pháp nào.
-
-&#x20;Cuộc tấn công Slowloris có thể khiến máy chủ web gặp sự cố bằng cách sử dụng một số lượng hạn chế các máy tính hoặc thậm chí chỉ một máy tính duy nhất mà không gây ra bất kỳ tác dụng phụ nào đối với các dịch vụ và cổng khác
+Hệ quả: Làm cạn kiệt tài nguyên của nạn nhân.
 
 
 
-**Tấn công Slowpost:** Cuộc tấn công này còn được gọi là Slow Request Bodies và xuất hiện lần đầu tiên vào năm 2010.
+***# Tấn công vào Lớp ứng dụng:***
 
-&#x20;Cuộc tấn công này tương tự như một cuộc tấn công Slowloris ở chỗ những kẻ tấn công gửi các phiên với các yêu cầu khối lượng công việc cao để đánh sập các máy chủ web.
 
-&#x20;Trong cuộc tấn công này, kẻ tấn công gửi một yêu cầu HTTP header hoàn chỉnh, định nghĩa trường độ dài nội dung (content length) trong phần thân thông điệp POST, giống như yêu cầu này được gửi cho lưu lượng truy cập bình thường.
 
-&#x20;Dữ liệu sau đó được gửi để lấp đầy phần thân thông báo với tốc độ một byte mỗi hai phút, và đồng thời máy chủ vẫn chờ đợi mỗi phần thân thông báo được hoàn thành, dẫn đến việc từ chối các dịch vụ web
+**Tấn công HTTP Flood:** Những kẻ tấn công gửi một lượng lớn các yêu cầu HTTP hợp lệ (get/post) đến một nạn nhân. Những yêu cầu như vậy thường được gửi bởi mạng botnet, nơi mỗi bot có thể tạo ra một lượng lớn các yêu cầu hợp lệ (thường là hơn 10 yêu cầu một giây). Tại đây, tốc độ yêu cầu kết nối phiên từ những kẻ tấn công cao hơn tốc độ yêu cầu kết nối phiên từ những người dùng bình thường. Và vì tốc độ đến lớn hơn tốc độ xử lý, hàng đợi sẽ dài ra vô hạn.
+
+Hệ quả: CPU bị ép làm việc ở mức cao, RAM bị chiếm dụng, website bị treo.
+
+
+
+**Tấn công Slowloris:** Trong giao thức HTTP, khi một Client gửi yêu cầu đến máy chủ Server, nó phải gửi một bộ HTTP Header hoàn chỉnh để máy chủ biết cần phải làm gì. Máy chủ sẽ mở một Socket và giữ nó mở cho đến khi nhận được toàn bộ Header. Tương tự http flood, cách tấn công này không nhắm vào lỗ hổng. Kẻ tấn công sẽ mở nhiều kết nối đến máy chủ web nhưng lại chỉ gửi các Http Header không hoàn chỉnh, thường thì chỉ vài dòng. Vì chúng vẫn đang ở trạng thái gửi dở, Slowris có thể chiếm dụng hàng nghìn kết nối, khiến máy chủ không còn socket nào trống.
+
+Hậu quả: Dịch vụ web bị tê liệt, không còn khả dụng với các kết nối hợp pháp khác.
+
+
+
+**Tấn công Slowpost:** Nếu Slowloris có thể được ngăn chặn bằng việc kiểm tra cấu trúc Header, Slowpost lại có cách tinh vi hơn. Kẻ tấn công gửi một yêu cầu HTTP POST hoàn toàn hợp lệ về mặt cấu trúc (đầy đủ Header). Tuy nhiên, điểm mấu chốt nằm ở trường Content-Length được khai báo một con số rất lớn. Thay vì gửi toàn bộ dữ liệu ngay lập tức, kẻ tấn công chỉ gửi từng byte một sau những khoảng thời gian nghỉ rất dài. Máy chủ buộc phải giữ kết nối luôn ở trạng thái mở để chờ đợi phần thân thông điệp hoàn tất.
+
+Hậu quả: Toàn bộ Connection Pool của máy chủ web sẽ bị lấp đầy bởi các yêu cầu đang chờ xử lý, dẫn tới không còn khả năng tiếp nhận bất kỳ yêu cầu mới nào từ người dùng thực tế, gây ra tình trạng từ chối dịch vụ hoàn toàn.
 
 
 
