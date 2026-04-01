@@ -152,6 +152,123 @@ Thiết lập giải pháp khai thác dữ liệu thống kê từ SNMP-MIB đ�
 
 
 
+Trong mạng máy tính, một chỉ số tăng vọt có thể do nhiều nguyên nhân khác nhau—cả bình thường lẫn độc hại, do đó không có biến đơn lẻ nào có khả năng nắm bắt tất cả các bất thường trên mạng.
+Do đó, tác giả tập trung vào việc sử dụng các biến SNMP-MIB hiệu quả để phát hiện bất thường chính xác hơn.
+
+
+
+**## Cách thức hoạt động:**
+
+
+
+1\. Chiến lược của tác giả
+
+Tác giả chọn bộ định tuyến (router) làm điểm thu thập dữ liệu vì đây là nút giao thông chính mà mọi luồng dữ liệu đều phải đi qua.
+
+Thay vì theo dõi toàn bộ hệ thống gây quá tải, tác giả chỉ chọn lọc ra 34 thông số (biến MIB) quan trọng và nhạy cảm nhất.
+
+Phân bổ: 34 thông số này được chia vào 5 nhóm cốt lõi (Interface, IP, ICMP, TCP, UDP) nhằm bao quát mọi hoạt động của mạng, từ việc đếm dữ liệu ra/vào, định tuyến đường đi, cho đến ghi nhận các lỗi kết nối.
+
+Bằng các cuộc khảo sát toàn diện, tác giả đã chọn các biến này trong số các biến MIB khác trong các nhóm vì chúng bị ảnh hưởng nhiều hơn bởi lưu lượng tấn công, nơi các biến này liên tục được cập nhật với lưu lượng vào và ra trên mạng; do đó, chúng có thể hiệu quả hơn cho việc phát hiện tấn công.
+
+
+
+2\. Dấu hiệu nhận biết
+
+Dữ liệu của 34 thông số này được đo bằng "bộ đếm 32" – tức là một dạng thông số chỉ cộng dồn liên tục tiến lên phía trước (từ 0 đến mức tối đa rồi mới quay vòng lại về 0).
+
+Cách phát hiện kẻ tấn công: Các thông số này chịu ảnh hưởng trực tiếp từ lưu lượng truyền tải trên mạng. Ở trạng thái bình thường, các con số này sẽ tăng lên một cách đều đặn. Tuy nhiên, khi có các cuộc tấn công ngập lụt, kẻ gian sẽ bơm một lượng dữ liệu rác khổng lồ vào hệ thống. Hệ quả là các thông số đo lường này sẽ gia tăng với tốc độ đột biến. Bằng cách theo dõi tốc độ tăng bất thường của 34 thông số này, hệ thống có thể nhận diện được ngay khi nào mạng đang bị tấn công.
+
+
+
+**# Các nhóm MIB-II cùng các biến tương ứng được khảo sát và sử dụng như sau:**
+
+
+
+a) Nhóm Interface (Giao diện): Nhóm này không liên quan đến một tầng cụ thể nào, nó định nghĩa thông tin về tất cả các giao diện của nút bao gồm số giao diện, địa chỉ vật lý và địa chỉ IP. Tác giả đã chọn 8 biến MIB từ nhóm này:
+
+1. ifInOctets: Biến này đại diện cho tổng số octet nhận được trên giao diện, bao gồm cả các ký tự tạo khung (framing).
+
+2\. ifOutOctets: Tổng số octet truyền ra khỏi giao diện, bao gồm cả các ký tự tạo khung.
+
+3\. ifoutDiscards: Số lượng các gói tin đi ra ngoài đã được chọn để loại bỏ mặc dù không có lỗi nào được phát hiện để ngăn chúng truyền đi.
+
+4\. ifInUcastPkts: Số lượng gói tin, được phân lớp phụ này chuyển đến một (phân) lớp cao hơn, không được định địa chỉ đến một địa chỉ đa hướng (multicast) hoặc quảng bá (broadcast) ở phân lớp phụ này.
+
+5\. ifInNUcastPkts: Số lượng gói tin, được phân lớp phụ này chuyển đến một (phân) lớp cao hơn, được định địa chỉ đến một địa chỉ đa hướng hoặc quảng bá ở phân lớp phụ này.
+
+6\. ifInDiscards: Số lượng các gói tin đi vào đã được chọn để loại bỏ mặc dù không có lỗi nào được phát hiện để ngăn chúng phân phối đến giao thức ở lớp cao hơn.
+
+7\. ifOutUcastPkts: Tổng số gói tin mà các giao thức cấp cao hơn yêu cầu truyền và không được định địa chỉ đến một địa chỉ đa hướng hoặc quảng bá ở phân lớp phụ này.
+
+8\. ifOutNUcastPkts: Tổng số gói tin mà các giao thức cấp cao hơn yêu cầu truyền, và được định địa chỉ đến một địa chỉ đa hướng hoặc quảng bá ở phân lớp phụ này, bao gồm cả những gói tin bị loại bỏ hoặc không được gửi.
+
+b) Nhóm IP: Nhóm này cung cấp thông tin tầng mạng liên quan đến IP, chẳng hạn như bảng định tuyến và địa chỉ IP. 
+
+Tác giả đã chọn 8 biến MIB từ nhóm này:
+
+1. ipInReceives: Tổng số datagram đầu vào nhận được từ các giao diện, bao gồm cả những datagram nhận được khi có lỗi.
+
+2\. ipInDelivers: Tổng số datagram đầu vào được phân phối thành công đến các giao thức người dùng IPv4 (bao gồm cả ICMP).
+
+3\. ipOutRequests: Tổng số datagram IPv4 mà các giao thức người dùng IPv4 cục bộ (bao gồm cả ICMP) cung cấp cho IPv4 trong các yêu cầu truyền tải.
+
+4\. ipOutDiscards: Số lượng các datagram IPv4 đầu ra không gặp phải sự cố nào ngăn cản việc truyền tải đến đích của chúng, nhưng đã bị loại bỏ.
+
+5\. ipInDiscards: Số lượng các datagram IPv4 đầu vào không gặp sự cố nào ngăn cản việc tiếp tục xử lý chúng, nhưng đã bị loại bỏ.
+
+6\. ipForwDatagrams: Số lượng các datagram đầu vào mà thực thể này không phải là đích IPv4 cuối cùng của chúng, kết quả là một nỗ lực đã được thực hiện để tìm tuyến đường chuyển tiếp chúng đến đích cuối cùng đó.
+
+7\. ipOutNoRoutes: Số lượng các datagram IPv4 bị loại bỏ vì không tìm thấy tuyến đường nào để truyền chúng đến đích. Lưu ý rằng điều này bao gồm mọi datagram mà máy chủ không thể định tuyến vì tất cả các bộ định tuyến mặc định của nó đều ngừng hoạt động.
+
+8\. ipInAddrErrors: Số lượng các datagram đầu vào bị loại bỏ vì địa chỉ IPv4 trong trường đích của header IPv4 không phải là một địa chỉ hợp lệ để được nhận tại thực thể này. Bộ đếm này bao gồm các datagram bị loại bỏ vì địa chỉ đích không phải là địa chỉ cục bộ.
+
+c) Nhóm ICMP: Nhóm này định nghĩa thông tin liên quan đến ICMP, chẳng hạn như số lượng gói tin đã gửi và nhận và tổng số lỗi được tạo ra.
+
+Tác giả đã chọn 6 biến MIB từ nhóm này:
+
+1. icmpInMsgs: Tổng số các thông điệp ICMP mà thực thể đã nhận được.
+
+2\. icmpInDestUnreachs: Số lượng các thông điệp ICMP Destination Unreachable nhận được.
+
+3\. icmpOutMsgs: Tổng số các thông điệp ICMP mà thực thể này đã nỗ lực gửi đi.
+
+4\. icmpOutDestUnreachs: Số lượng các thông điệp ICMP Destination Unreachable đã gửi.
+
+5\. icmpInEchos: Số lượng các thông điệp ICMP Echo (yêu cầu) nhận được.
+
+6\. icmpOutEchoReps: Số lượng các thông điệp ICMP Echo Reply đã gửi.
+
+d) Nhóm TCP: Nhóm này cung cấp thông tin tầng giao vận liên quan đến TCP, chẳng hạn như bảng kết nối, giá trị thời gian chờ (time-out), số lượng cổng, và số lượng gói tin đã gửi và nhận. Tác giả đã chọn 8 biến MIB từ nhóm này:
+
+1. tcpOutRsts: Số lượng các phân đoạn (segment) TCP đã gửi chứa cờ RST.
+
+2\. tcpInSegs: Tổng số các phân đoạn nhận được, bao gồm cả những phân đoạn nhận được khi có lỗi. Bộ đếm này bao gồm các phân đoạn nhận được trên các kết nối hiện đang được thiết lập.
+
+3\. tcpActiveOpens: Số lần các kết nối TCP đã thực hiện một quá trình chuyển đổi trực tiếp sang trạng thái SYN-SENT từ trạng thái CLOSED
+
+4\. tcpOutSegs: Tổng số các phân đoạn đã gửi, bao gồm cả những phân đoạn trên các kết nối hiện tại nhưng loại trừ những phân đoạn chỉ chứa các octet được truyền lại.
+
+5\. tcpPassiveOpens: Số lần các kết nối TCP đã thực hiện quá trình chuyển đổi trực tiếp sang trạng thái SYN-RCVD (lưu ý: bản gốc ghi là SYN state nhưng ý nghĩa chính xác là chuyển trạng thái SYN).
+
+6\. tcpRetransSegs: Tổng số các phân đoạn được truyền lại; nghĩa là, số lượng các phân đoạn TCP được truyền đi chứa một hoặc nhiều octet đã được truyền trước đó.
+
+7\. tcpCurrEstab: Số lượng các kết nối TCP có trạng thái hiện tại là ESTABLISHED hoặc CLOSE-WAIT.
+
+8\. tcpEstabResets: Số lần các kết nối TCP đã thực hiện một quá trình chuyển đổi trực tiếp sang trạng thái CLOSED từ trạng thái ESTABLISHED hoặc trạng thái CLOSE-WAIT.
+
+e) Nhóm UDP: Nhóm này cung cấp thông tin tầng giao vận liên quan đến UDP, chẳng hạn như số lượng cổng và số lượng gói tin đã gửi và nhận.
+
+&#x20;Tác giả đã chọn 4 biến MIB từ nhóm này:
+
+1. udpInDatagrams: Tổng số datagram UDP được phân phối cho người dùng UDP.
+
+2\. udpOutDatagrams: Tổng số datagram UDP được gửi từ thực thể này.
+
+3\. udpInErrors: Số lượng các datagram UDP nhận được không thể phân phối vì các lý do khác ngoài việc thiếu ứng dụng ở cổng đích.
+
+4\. udpNoPorts: Tổng số các datagram UDP nhận được mà không có ứng dụng nào ở cổng đích
+
 
 
 **Các bước để tạo dataset:**
@@ -165,26 +282,4 @@ Bước 2: Tạo lưu lượng mạng bình thường (Normal Traffic Generation
 Bước 3: Phát động các cuộc tấn công: Máy Attacker sử dụng hàng loạt công cụ mã nguồn mở để tấn công máy Victim bằng các kịch bản khác nhau
 
 Bước 4: Trong khi các cuộc tấn công đang diễn ra, một chương trình bằng ngôn ngữ Java sẽ "hỏi" bộ định tuyến cứ mỗi 15 giây một lần để chép lại 34 chỉ số MIB. Con số 15 giây được chọn vì nó đủ nhanh để bắt được dấu vết tấn công nhưng không làm máy móc bị quá tải.
-
-
-
-**### Cách thức hoạt động:**
-
-
-
-1\. Chiến lược theo dõi/ Hay Tại sao lại chọn 34 biến?
-
-Tác giả chọn bộ định tuyến (router) làm điểm thu thập dữ liệu vì đây là nút giao thông chính mà mọi luồng dữ liệu đều phải đi qua.
-
-Không có một thông số đơn lẻ nào đủ để phát hiện mọi loại tấn công.
-
-Thay vì theo dõi toàn bộ hệ thống gây quá tải, tác giả chỉ chọn lọc ra 34 thông số (biến MIB) quan trọng và nhạy cảm nhất.
-
-Phân bổ: 34 thông số này được chia vào 5 nhóm cốt lõi (Interface, IP, ICMP, TCP, UDP) nhằm bao quát mọi hoạt động của mạng, từ việc đếm dữ liệu ra/vào, định tuyến đường đi, cho đến ghi nhận các lỗi kết nối.
-
-2\. Dấu hiệu nhận biết
-
-Dữ liệu của 34 thông số này được đo bằng "bộ đếm 32" – tức là một dạng thông số chỉ cộng dồn liên tục tiến lên phía trước (từ 0 đến mức tối đa rồi mới quay vòng lại về 0).
-
-Cách phát hiện kẻ tấn công: Các thông số này chịu ảnh hưởng trực tiếp từ lưu lượng truyền tải trên mạng. Ở trạng thái bình thường, các con số này sẽ tăng lên một cách đều đặn. Tuy nhiên, khi có các cuộc tấn công ngập lụt, kẻ gian sẽ bơm một lượng dữ liệu rác khổng lồ vào hệ thống. Hệ quả là các thông số đo lường này sẽ gia tăng với tốc độ đột biến. Bằng cách theo dõi tốc độ tăng bất thường của 34 thông số này, hệ thống có thể nhận diện được ngay khi nào mạng đang bị tấn công.
 
