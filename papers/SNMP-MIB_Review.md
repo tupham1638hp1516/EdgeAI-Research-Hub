@@ -1,5 +1,3 @@
-
-
 **## Các khái niệm cần tìm hiểu:**
 
 
@@ -67,6 +65,7 @@ MIB Là một cơ sở dữ liệu nằm trong thiết bị mạng, lưu trữ c
 **### Vậy thành quả của tác giả có thể hiểu là:**
 
 
+
 Thiết lập giải pháp khai thác dữ liệu thống kê từ SNMP-MIB để thay thế việc phân tích gói tin thô nặng nề. Họ đã tinh lọc và định danh bộ 34 biến MIB nhạy cảm nhất trong hàng ngàn biến số MIB có sẵn qua thuật toán đo độ lợi thông tin, giúp tối ưu hóa khả năng nhận diện tấn công đa tầng. Từ đó, nhóm xây dựng một mô hình thực nghiệm thực tế và bộ dữ liệu 4998 bản ghi chất lượng cao, chứng minh khả năng phát hiện xâm nhập một cách nhẹ nhàng và hiệu quả. Cuối cùng, nghiên cứu xác lập quy trình lấy mẫu 15 giây/lần là khoảng thời gian tối ưu để đảm bảo phát hiện nhanh các cuộc tấn công hiện đại mà không gây gánh nặng cho thiết bị mạng. Thành quả của họ là tạo ra phương pháp luận và dữ liệu thực chứng.
 
 
@@ -75,7 +74,7 @@ Thiết lập giải pháp khai thác dữ liệu thống kê từ SNMP-MIB đ�
 
 
 
-1\.**Bất thường mạng**: 
+1\.**Bất thường mạng**:
 
 Bất thường mạng là sự sai lệch so với hành vi bình thường của mạng khi có bất kỳ kẻ xâm nhập nào trong mạng hoặc do quá tải mạng. Những sự kiện bất thường này làm gián đoạn chức năng bình thường của các dịch vụ mạng. Hành vi mạng bình thường có thể được đặc trưng bởi nhiều yếu tố khác nhau, chẳng hạn như loại dữ liệu mạng cần đo lường, khối lượng lưu lượng của mạng và loại ứng dụng đang chạy trên mạng. Hơn nữa, Hệ thống phát hiện xâm nhập (IDS) là quá trình giám sát bất kỳ hoạt động bất thường nào xảy ra trong hệ thống máy tính hoặc mạng và so sánh nó với một sự kiện bình thường để xác định các dấu hiệu xâm nhập. Xâm nhập đề cập đến một hoạt động độc hại nhằm phá vỡ tính bảo mật, tính toàn vẹn và tính sẵn sàng của các thành phần mạng trong nỗ lực phá vỡ chính sách bảo mật của mạng
 
@@ -137,6 +136,42 @@ Dưới đây là một số ví dụ về DoS flooding attack:
 
 
 
+**Tấn công HTTP Flood:** Tấn công này còn được gọi là tấn công làm ngập lụt HTTP GET/POST.
+
+&#x20;Nó cũng được coi là một cuộc tấn công không giả mạo.
+
+&#x20;Trong cuộc tấn công này, kẻ tấn công nhằm mục đích tấn công các máy chủ web và các ứng dụng để tiêu thụ một lượng lớn tài nguyên của nạn nhân.
+
+&#x20;Những kẻ tấn công gửi một lượng lớn các yêu cầu HTTP hợp lệ (get/post) đến một nạn nhân, như thể hiện trong Hình 3.
+
+&#x20;Những yêu cầu như vậy thường được gửi bởi mạng botnet, nơi mỗi bot có thể tạo ra một lượng lớn các yêu cầu hợp lệ (thường là hơn 10 yêu cầu một giây).
+
+&#x20;Tại đây, tốc độ yêu cầu kết nối phiên từ những kẻ tấn công cao hơn tốc độ yêu cầu kết nối phiên từ những người dùng bình thường.
+
+&#x20;Một cuộc tấn công làm ngập lụt HTTP có thể là một trong những mối đe dọa không dùng lỗ hổng lớn nhất mà các máy chủ web có thể gặp phải vì rất khó để phân biệt giữa lưu lượng HTTP độc hại và lưu lượng HTTP bình thường
+
+
+
+**Tấn công Slowloris:** Cuộc tấn công này còn được gọi là tấn công Slow Header.
+
+Trong cuộc tấn công, kẻ tấn công với một địa chỉ IP không giả mạo sẽ gửi các phiên có yêu cầu khối lượng công việc cao.
+
+&#x20;Các yêu cầu này là các yêu cầu HTTP header một phần, cập nhật rất chậm, phát triển nhanh chóng và liên tục, và không bao giờ đóng lại.
+
+&#x20;Cuộc tấn công tiếp tục cho đến khi tất cả các socket kết nối có sẵn bị các yêu cầu này chiếm dụng, và máy chủ web trở nên không khả dụng đối với bất kỳ kết nối hợp pháp nào.
+
+&#x20;Cuộc tấn công Slowloris có thể khiến máy chủ web gặp sự cố bằng cách sử dụng một số lượng hạn chế các máy tính hoặc thậm chí chỉ một máy tính duy nhất mà không gây ra bất kỳ tác dụng phụ nào đối với các dịch vụ và cổng khác
+
+
+
+**Tấn công Slowpost:** Cuộc tấn công này còn được gọi là Slow Request Bodies và xuất hiện lần đầu tiên vào năm 2010.
+
+&#x20;Cuộc tấn công này tương tự như một cuộc tấn công Slowloris ở chỗ những kẻ tấn công gửi các phiên với các yêu cầu khối lượng công việc cao để đánh sập các máy chủ web.
+
+&#x20;Trong cuộc tấn công này, kẻ tấn công gửi một yêu cầu HTTP header hoàn chỉnh, định nghĩa trường độ dài nội dung (content length) trong phần thân thông điệp POST, giống như yêu cầu này được gửi cho lưu lượng truy cập bình thường.
+
+&#x20;Dữ liệu sau đó được gửi để lấp đầy phần thân thông báo với tốc độ một byte mỗi hai phút, và đồng thời máy chủ vẫn chờ đợi mỗi phần thân thông báo được hoàn thành, dẫn đến việc từ chối các dịch vụ web
+
 
 
 **Các bước để tạo dataset:**
@@ -172,10 +207,4 @@ Phân bổ: 34 thông số này được chia vào 5 nhóm cốt lõi (Interface
 Dữ liệu của 34 thông số này được đo bằng "bộ đếm 32" – tức là một dạng thông số chỉ cộng dồn liên tục tiến lên phía trước (từ 0 đến mức tối đa rồi mới quay vòng lại về 0).
 
 Cách phát hiện kẻ tấn công: Các thông số này chịu ảnh hưởng trực tiếp từ lưu lượng truyền tải trên mạng. Ở trạng thái bình thường, các con số này sẽ tăng lên một cách đều đặn. Tuy nhiên, khi có các cuộc tấn công ngập lụt, kẻ gian sẽ bơm một lượng dữ liệu rác khổng lồ vào hệ thống. Hệ quả là các thông số đo lường này sẽ gia tăng với tốc độ đột biến. Bằng cách theo dõi tốc độ tăng bất thường của 34 thông số này, hệ thống có thể nhận diện được ngay khi nào mạng đang bị tấn công.
-
-
-
-
-
-
 
