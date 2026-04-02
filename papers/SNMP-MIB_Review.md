@@ -281,7 +281,7 @@ Bước 1: Thiết lập môi trường mạng thực: Tác giả xây dựng m�
 
 
 
-Bước 2: Tạo lưu lượng mạng bình thường (Normal Traffic Generation): 
+Bước 2: Tạo lưu lượng mạng bình thường (Normal Traffic Generation):
 
 Sử dụng phần mềm LanTrafficV2 cài đặt trên các máy tính để tự động tạo ra các luồng dữ liệu (TCP, UDP, ICMP) qua lại giữa 2 mạng con. Lưu lượng bình thường được duy trì ở tốc độ lên tới 50 Mbps để giả lập một mạng đang hoạt động thực tế.
 
@@ -302,6 +302,7 @@ Bước 4: Trong khi các cuộc tấn công đang diễn ra, một chương tr�
 
 
 *Nhóm tác giả đã sử dụng một số công cụ tấn công mã nguồn mở nổi tiếng để thử nghiệm:*
+
 
 
 Các công cụ này cung cấp một số tham số cấu hình, chẳng hạn như loại gói (TCP, UDP, ICMP), số lượng gói được gửi, kích thước gói, độ trễ, v.v.
@@ -372,7 +373,7 @@ Nhận định: Khi máy chủ bị quá tải bởi các yêu cầu HTTP từ D
 
 1. tcpCurrEstab: Biến này tăng lên mức trần (đạt giới hạn tối đa của máy chủ) và duy trì liên tục ở mức cao đó, phản ánh việc toàn bộ socket bị chiếm dụng. Đây là dấu hiệu nhận biết rõ nhất của Slowloris.
 
-2\. tcpPassiveOpens: Tăng mạnh khi kẻ tấn công liên tục khởi tạo hàng nghìn kết nối mới ban đầu.
+2\. tcpPassiveOpens: Tăng mạnh khi kẻ tấn công liên tục khởi tạo hàng nghìn kết nối  mới ban đầu.
 
 3\. tcpInSegs: Trái ngược với tấn công ngập lụt, biến này có xu hướng giảm hoặc thấp hơn bình thường (negative deviation) do kết nối bị treo lại, không có dữ liệu mới nào được gửi hay nhận thêm.
 
@@ -405,6 +406,120 @@ Nhận định: Do không dùng băng thông lớn, các biến Interface không
 
 
 Nhận định: Cả hai công cụ này đều nhắm vào việc vắt kiệt tài nguyên xử lý của tầng ứng dụng (CPU, RAM xử lý mã nguồn PHP/Apache). Khi máy chủ bận rộn xử lý các đăng nhập sai hoặc các header chậm, nó mất khả năng phản hồi các giao thức nền khác. Để theo dõi sự kiệt quệ tài nguyên gián tiếp này, nhóm tác giả sử dụng 4 biến UDP, trong đó biến udpInErrors theo dõi các datagram bị lỗi "do các lý do khác ngoài việc thiếu ứng dụng ở cổng đích" (như tràn bộ nhớ RAM hoặc CPU quá tải không xử lý kịp).
+
+
+
+**# Cách thức tiến hành các cuộc tấn công:**
+
+
+
+Để đảm bảo bộ dữ liệu mang tính thực tế (Realistic) và không bị phụ thuộc vào các công cụ mô phỏng ảo - vốn là điểm yếu của nhiều tập dữ liệu IDS trước đây, nhóm tác giả đã xây dựng một mạng thử nghiệm phần cứng thực tế.
+
+
+
+Chi tiết thiết lập:
+
+Cấu trúc mạng biệt lập: Gồm 1 bộ định tuyến (Router) ở giữa, kết nối 2 mạng con (Subnet) thông qua 2 Switch. Máy Attacker nằm ở mạng con 1, máy Server (Victim - chạy Apache, VNC, FTP) nằm ở mạng con 2.
+
+Tạo nhiễu nền: Tác giả dùng phần mềm LanTrafficV2 để sinh ra lưu lượng mạng bình thường liên tục với cấu hình 70% TCP và 30% UDP, đẩy băng thông lên tới mức 50 Mbps.
+
+Kịch bản tấn công: Các công cụ tấn công (HyenaeFE, DOSHTTP, Slowloris script, THC-Hydra) được cấu hình thực tế. Ví dụ, với Slowloris, kẻ tấn công chỉ cần gửi 1000 socket mỗi 10 giây nhưng đã đủ để đánh sập máy chủ Apache chỉ trong 3 phút.
+
+Cơ chế thu thập: Một chương trình Java (dùng webNMS Agent Toolkit) gửi truy vấn GET/GET-NEXT đến Router để đọc 34 biến MIB với tần suất 15 giây một lần.
+
+
+
+***Nhận xét:***
+
+
+
+Việc tác giả cô lập hoàn toàn mạng thử nghiệm khỏi Internet là một quyết định hợp lý. Nó giúp loại bỏ các "nhiễu" không xác định từ Internet, đảm bảo dữ liệu thu được đáng tin cậy. Bên cạnh đó, việc sử dụng LanTrafficV2 để duy trì mức băng thông nền 50 Mbps giúp tập dữ liệu không bị rơi vào trạng thái sterile network – một sai lầm mà nhiều nghiên cứu IDS mắc phải khi chỉ thu thập dữ liệu lúc mạng rảnh rỗi.
+
+Lựa chọn tần suất 15 giây: Tác giả đã phân tích và kế thừa từ các nghiên cứu trước đó để tìm ra điểm cân bằng hoàn hảo. Nếu lấy mẫu quá nhanh (ví dụ 1 giây/lần), chính truy vấn của SNMP sẽ tự biến thành một cuộc tấn công DoS làm treo Router. Nếu lấy mẫu quá chậm (ví dụ 1 phút/lần), IDS sẽ trở nên vô dụng vì máy chủ có thể đã sập trước khi hệ thống kịp cảnh báo (như kịch bản Slowloris đánh sập server trong 3 phút).
+
+
+
+
+
+***# Đánh giá và Phân tích tập dữ liệu thu được:***
+
+
+
+Quá trình thực nghiệm đã thu về một tập dữ liệu gồm 4998 bản ghi, bao phủ đa dạng các kịch bản: 600 bản ghi lưu lượng bình thường và 4398 bản ghi tấn công (chia đều cho TCP-SYN, UDP flood, ICMP-ECHO, HTTP flood, Slowloris, Slowpost, Brute Force).
+
+
+
+Thay vì cung cấp dữ liệu thô, nhóm tác giả đã thực hiện phân tích thống kê thông qua 2 lăng kính: Độ lệch chuẩn (STD) và Độ lợi thông tin (Information Gain).
+
+1\. Phân tích qua Độ lệch chuẩn (STD): Dữ liệu cho thấy sự biến động cực kỳ dữ dội trong quá trình mạng bị tấn công. Biến ifInOctets (tổng byte nhận vào) có độ lệch chuẩn lên tới mức cực lớn: hơn 1,2 tỷ.
+
+
+
+Phân tích: Độ lệch chuẩn khổng lồ này phản ánh chính xác bản chất của các cuộc tấn công ngập lụt băng thông (như UDP hay ICMP flood). Tuy nhiên, tác giả cũng ngầm chỉ ra một cảnh báo: nếu chỉ dùng các thuật toán dựa trên ngưỡng thông thường để thiết lập giới hạn cho các biến này, hệ thống sẽ rất dễ sinh ra cảnh báo giả vì ranh giới giữa lưu lượng bình thường lúc cao điểm và lưu lượng tấn công là rất mong manh.
+
+
+
+2\. Phân tích qua Độ lợi thông tin (Information Gain - IG): Tác giả dùng thuật toán IG để xếp hạng độ quan trọng của 34 biến trong việc phân biệt giữa trạng thái "bình thường" và "bị tấn công".
+
+Kết quả cho thấy: Biến ipOutDiscards (số datagram IP bị vứt bỏ dù không có lỗi) giữ Hạng 1 với điểm IG cao nhất (0.6338). Các vị trí tiếp theo thuộc về các gói tin báo lỗi như icmpOutDestUnreachs (Hạng 2) và ipInDiscards (Hạng 3).
+
+Ngược lại Biến ifInOctets (tổng số byte đầu vào) - chỉ số mà các quản trị trị viên mạng thường nhìn vào đầu tiên để xem mạng có bị nghẽn hay không - lại bị xếp ở Hạng 34 (hạng bét) với điểm IG = 0.
+
+
+
+***Nhận xét:***
+
+
+
+Kết quả của bảng xếp hạng IG mang tính "cách mạng". Nó chứng minh rằng: Việc nhìn vào lưu lượng mạng lớn hay nhỏ không giúp ích gì cho Machine Learning trong việc nhận diện một cuộc tấn công tinh vi. (Ví dụ: Tấn công Slowloris hoàn toàn không làm tăng băng thông nhưng vẫn đánh sập mạng). Thay vào đó, Machine Learning cực kỳ nhạy bén với các "chỉ số cạn kiệt tài nguyên". Khi Router bắt đầu phải "vứt bỏ" các gói tin hợp lệ (ipOutDiscards) hoặc liên tục gửi các thông báo "không thể kết nối" (icmpOutDestUnreachs), đó mới là lời tố cáo rõ ràng nhất rằng hệ thống đang bị tổn thương sâu sắc từ bên trong.
+
+
+
+Mặc dù bộ dữ liệu rất chất lượng, nhưng ta có thể thấy có sự mất cân bằng lớp khá rõ: 600 bản ghi Normal so với 4398 bản ghi Attack. Sự mất cân bằng này có thể khiến mô hình bị bias và dễ dàng phán đoán mọi thứ là "Attack". Các nghiên cứu sử dụng lại bộ dữ liệu này chắc chắn sẽ phải dùng thêm các kỹ thuật cân bằng dữ liệu (như SMOTE) trước khi đưa vào huấn luyện.
+
+
+
+
+
+***# Kết luận của tác giả và Ý nghĩa nghiên cứu***
+
+
+
+
+
+1\. Tác giả khẳng định họ đã tạo ra một tập dữ liệu thực tế, hoàn toàn không thiên vị (unbiased), không chứa các thuộc tính ngoài ý muốn trong cả lưu lượng bình thường lẫn lưu lượng bất thường. Tập dữ liệu này thành công trong việc bao phủ các cuộc tấn công hiện đại trên cả 3 tầng mạng: Tầng mạng (Network), Tầng giao vận (Transport) và Tầng ứng dụng (Application).
+
+
+
+***Nhận xét:***
+
+Trong những cuộc nghiên cứu trước,nhiều người thường bị mắc kẹt với các tập dữ liệu cũ kỹ vốn được tạo ra từ môi trường giả lập (simulated) và không còn phản ánh đúng các cuộc tấn công hiện đại. Việc tác giả tự xây dựng Test-bed và công bố 4998 bản ghi thực tế này là một đột phá.
+
+Tính "sạch" của dữ liệu: Bằng cách cô lập mạng thử nghiệm, tác giả đảm bảo rằng nhãn (label) của dữ liệu là chính xác tuyệt đối. Khi một bản ghi được dán nhãn là "tấn công Slowloris", các nhà nghiên cứu sau này có thể tin tưởng 100% rằng sự biến động của 34 biến MIB lúc đó hoàn toàn là do Slowloris gây ra, không bị lẫn lộn bởi các tác nhân nhiễu (noise) ngẫu nhiên từ Internet.
+
+
+
+2\. Khẳng định SNMP-MIB là một giải pháp thay thế rất hiệu quả và siêu nhẹ.
+
+Phương pháp tạo dữ liệu của tác giả cung cấp bằng chứng về khả năng và tính hiệu quả của dữ liệu SNMP-MIB trong việc phát hiện bất thường mạng thông qua việc nhận diện thành công số lượng lớn các cuộc tấn công phổ biến.
+
+
+
+***Nhận xét:***
+
+SNMP-MIB giải quyết bài toán trên một cách khác biệt. Nó không quan tâm nội dung gói tin là gì, nó chỉ nhìn vào các thống kê như: có bao nhiêu gói tin bị vứt bỏ, có bao nhiêu kết nối đang chờ. Việc sử dụng MIB biến IDS từ một hệ thống cồng kềnh thành một module giám sát "siêu nhẹ", tiết kiệm tối đa tài nguyên CPU/RAM của hệ thống.
+
+
+
+3\. Khi áp dụng các thuật toán phân loại lên 5 nhóm MIB, nhóm tác giả phát hiện ra rằng hiệu suất của mỗi bộ phân loại biến thiên rất khác nhau trên từng nhóm.
+
+
+
+***Nhận xét:***
+
+Vì sự thay đổi của mạng khi bị tấn công là sự cộng hưởng phức tạp của hàng chục biến số (ví dụ: biến TCP tăng nhưng biến UDP giảm, biến ICMP báo lỗi...), bộ não con người hoặc các bộ quy tắc (rule-based IF/ELSE) truyền thống không thể xử lý nổi. Sự phân hóa về hiệu suất trên 5 nhóm MIB rất phù hợp để áp dụng Học máy (Machine Learning).
+
+Từ kết luận này của tác giả, ta có thể thấy một hướng nghiên cứu tiềm năng: Xây dựng các Mô hình học máy kết hợp. Thay vì dùng 1 thuật toán cho toàn bộ 34 biến, ta có thể huấn luyện Thuật toán A chuyên giám sát nhóm TCP, Thuật toán B chuyên giám sát nhóm UDP, sau đó tổng hợp kết quả của chúng lại để đưa ra phán quyết cuối cùng. Điều này sẽ đẩy độ chính xác của IDS lên mức tối đa.
 
 
 
