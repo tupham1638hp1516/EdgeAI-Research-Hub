@@ -70,7 +70,7 @@ Dưới đây là một số ví dụ về DoS flooding attack:
 
 
 
-**Tấn công TCP-SYN:** 
+**Tấn công TCP-SYN:**
 
 Cơ chế : Kẻ tấn công gửi hàng loạt gói tin SYN với địa chỉ IP giả mạo. Máy chủ phản hồi SYN-ACK và đưa kết nối vào trạng thái "Nửa mở" (Half-open) trong hàng đợi Backlog. Vì IP nguồn là giả, máy chủ không bao giờ nhận được gói ACK cuối cùng.
 
@@ -78,7 +78,7 @@ Hệ quả: Cạn kiệt Backlog Queue và bộ nhớ RAM. CPU bị bắt làm q
 
 
 
-**Tấn công UDP Flood:** 
+**Tấn công UDP Flood:**
 
 Cơ chế: Khác với TCP, UDP là giao thức phi kết nối. Vì UDP không cần thiết lập kết nối, các kẻ tấn công rất dễ gửi chúng đi, thậm chí là hàng triệu. Điều đáng lo ở đây là các gói UDP đó thường được gửi vào các cổng không có thật hoặc không có ứng dụng nào ở đó. Máy chủ thì lại phải phản hồi rất lâu: mở gói tin, kiểm tra ứng dụng, gửi một gói tin ICMP mới.
 
@@ -175,6 +175,8 @@ Bằng các cuộc khảo sát toàn diện, tác giả đã chọn các biến 
 
 2\. Dấu hiệu nhận biết
 
+
+
 Dữ liệu của 34 thông số này được đo bằng "bộ đếm 32" – tức là một dạng thông số chỉ cộng dồn liên tục tiến lên phía trước (từ 0 đến mức tối đa rồi mới quay vòng lại về 0).
 
 Cách phát hiện kẻ tấn công: Các thông số này chịu ảnh hưởng trực tiếp từ lưu lượng truyền tải trên mạng. Ở trạng thái bình thường, các con số này sẽ tăng lên một cách đều đặn. Tuy nhiên, khi có các cuộc tấn công ngập lụt, kẻ gian sẽ bơm một lượng dữ liệu rác khổng lồ vào hệ thống. Hệ quả là các thông số đo lường này sẽ gia tăng với tốc độ đột biến. Bằng cách theo dõi tốc độ tăng bất thường của 34 thông số này, hệ thống có thể nhận diện được ngay khi nào mạng đang bị tấn công.
@@ -203,7 +205,7 @@ a) Nhóm Interface (Giao diện): Nhóm này không liên quan đến một tầ
 
 8\. ifOutNUcastPkts: Tổng số gói tin mà các giao thức cấp cao hơn yêu cầu truyền, và được định địa chỉ đến một địa chỉ đa hướng hoặc quảng bá ở phân lớp phụ này, bao gồm cả những gói tin bị loại bỏ hoặc không được gửi.
 
-b) Nhóm IP: Nhóm này cung cấp thông tin tầng mạng liên quan đến IP, chẳng hạn như bảng định tuyến và địa chỉ IP. 
+b) Nhóm IP: Nhóm này cung cấp thông tin tầng mạng liên quan đến IP, chẳng hạn như bảng định tuyến và địa chỉ IP.
 
 Tác giả đã chọn 8 biến MIB từ nhóm này:
 
@@ -271,15 +273,138 @@ e) Nhóm UDP: Nhóm này cung cấp thông tin tầng giao vận liên quan đ�
 
 
 
-**Các bước để tạo dataset:**
+**Các bước để tạo dataset:(OVERALL)**
 
 
 
-Bước 1: Thiết lập môi trường mạng thực: Tác giả xây dựng một mạng cục bộ biệt lập với Internet để đảm bảo tính chân thực, bao gồm 1 bộ định tuyến (router), 2 bộ chuyển mạch (switches) và 2 mạng con. Mạng con thứ nhất có 1 máy tính đóng vai trò Attacker; mạng con thứ hai có 1 máy tính làm Victim.
+Bước 1: Thiết lập môi trường mạng thực: Tác giả xây dựng một mạng cục bộ biệt lập với Internet để đảm bảo tính chân thực, bao gồm 1 bộ định tuyến (router), 2 bộ chuyển mạch (switches) và 2 mạng con. Mạng con thứ nhất có 1 máy tính đóng vai trò Attacker; mạng con thứ hai có 1 máy tính làm Victim, cả 2 mạng con đều chứa 5 PC.
 
-Bước 2: Tạo lưu lượng mạng bình thường (Normal Traffic Generation): Sử dụng phần mềm LanTrafficV2 cài đặt trên các máy tính để tự động tạo ra các luồng dữ liệu (TCP, UDP, ICMP) qua lại giữa 2 mạng con. Lưu lượng bình thường được duy trì ở tốc độ lên tới 50 Mbps để giả lập một mạng đang hoạt động thực tế.
 
-Bước 3: Phát động các cuộc tấn công: Máy Attacker sử dụng hàng loạt công cụ mã nguồn mở để tấn công máy Victim bằng các kịch bản khác nhau
+
+Bước 2: Tạo lưu lượng mạng bình thường (Normal Traffic Generation): 
+
+Sử dụng phần mềm LanTrafficV2 cài đặt trên các máy tính để tự động tạo ra các luồng dữ liệu (TCP, UDP, ICMP) qua lại giữa 2 mạng con. Lưu lượng bình thường được duy trì ở tốc độ lên tới 50 Mbps để giả lập một mạng đang hoạt động thực tế.
+
+
+
+Bước 3: Phát động các cuộc tấn công:
+
+Máy Attacker sử dụng hàng loạt công cụ mã nguồn mở để tấn công máy Victim bằng các kịch bản khác nhau.
+
+
 
 Bước 4: Trong khi các cuộc tấn công đang diễn ra, một chương trình bằng ngôn ngữ Java sẽ "hỏi" bộ định tuyến cứ mỗi 15 giây một lần để chép lại 34 chỉ số MIB. Con số 15 giây được chọn vì nó đủ nhanh để bắt được dấu vết tấn công nhưng không làm máy móc bị quá tải.
+
+
+
+**#Phân tích sâu hơn**
+
+
+
+*Nhóm tác giả đã sử dụng một số công cụ tấn công mã nguồn mở nổi tiếng để thử nghiệm:*
+
+
+Các công cụ này cung cấp một số tham số cấu hình, chẳng hạn như loại gói (TCP, UDP, ICMP), số lượng gói được gửi, kích thước gói, độ trễ, v.v.
+
+. Những điều này có thể rất hữu ích trong việc tạo ra các cuộc tấn công
+
+. Trong bài báo này, chúng tôi đã tiến hành một cuộc tấn công Brute Force và sáu loại tấn công làm ngập lụt DoS, được thực hiện bằng cách sử dụng các công cụ đã đề cập trước đó với thời lượng và tham số khác nhau, như được giải thích bên dưới
+
+. Các loại tấn công với các công cụ tương ứng được minh họa trong Bảng 2
+
+. Như được minh họa trong Bảng 2, chúng tôi đã thực hiện các cuộc tấn công bằng cách sử dụng các công cụ khác nhau
+
+. Mỗi loại tấn công được phát động chống lại máy chủ (nạn nhân) trong các kịch bản khác nhau
+
+
+
+*Các công cụ tấn công được nhóm tác giả sử dụng bao gồm:*
+
+
+
+**Công cụ HyenaeFE** (Tác động lên nhóm Interface và IP - 16 biến): Công cụ này tạo ra các cuộc tấn công ngập lụt (như TCP-SYN, UDP flood, ICMP-ECHO) nhằm làm cạn kiệt băng thông và tài nguyên hệ thống. Trong quá trình thử nghiệm, tải lưu lượng mạng có lúc bị đẩy lên tới mức 50 Mbps. Sự thay đổi ở 16 biến này chủ yếu phản ánh sự quá tải về khối lượng gói tin và tràn bộ nhớ đệm:
+
+
+
+Nhóm Interface (8 biến): Phản ánh sự thay đổi ở tầng vật lý và liên kết dữ liệu.
+
+1. ifInOctets \& ifOutOctets: Hai biến này tăng vọt do khối lượng lớn gói tin rác tràn vào và hệ thống cố gắng gửi các gói tin phản hồi lại.
+
+2\. ifInUcastPkts \& ifOutUcastPkts: Chúng tăng mạnh vì phần lớn lưu lượng tấn công nhắm trực tiếp vào địa chỉ IP của nạn nhân.
+
+3\. ifInNUcastPkts \& ifOutNUcastPkts: Chúng gia tăng nếu kẻ tấn công sử dụng các gói tin quảng bá (ví dụ: tấn công Smurf/ICMP dùng địa chỉ IP giả mạo).
+
+4\. ifInDiscards \& ifoutDiscards: Chúng tăng theo cấp số nhân vì bộ nhớ đệm (buffer) của card mạng bị tràn do không thể xử lý kịp lượng gói tin ồ ạt.
+
+Nhóm IP (8 biến): Phản ánh sự tắc nghẽn ở tầng mạng.
+
+1. ipInReceives: Biến này đạt đỉnh (spike) dữ dội trong bất kỳ cuộc tấn công ngập lụt nào.
+
+2\. ipInDelivers: Biến này có thể tăng, nhưng tỷ lệ (ratio) của nó so với ipInReceives sẽ giảm mạnh (dưới 30%) vì hệ thống không thể xử lý nổi.
+
+3\. ipOutRequests: Tăng mạnh do máy chủ cố gắng tạo các gói phản hồi (như RST hoặc ICMP).
+
+4\. ipOutDiscards \& ipInDiscards: Tăng mạnh do cạn kiệt không gian bộ nhớ đệm.
+
+5\. ipForwDatagrams: Tăng nếu bộ định tuyến bị lợi dụng để chuyển tiếp các gói tin giả mạo.
+
+6\. ipOutNoRoutes: Gia tăng khi kẻ tấn công sử dụng địa chỉ IP nguồn giả mạo không có tuyến đường phản hồi hợp lệ.
+
+7\. ipInAddrErrors: Tăng nếu kẻ tấn công gửi gói tin đến các địa chỉ sai lệch
+
+
+
+**Công cụ DOSHTTP 2.5.1** (Tác động lên nhóm ICMP - 6 biến) Khi tạo tấn công HTTP Flood, công cụ này tạo ra các yêu cầu hợp lệ lặp đi lặp lại làm cạn kiệt tài nguyên máy chủ. Khi máy chủ bị quá tải và không thể phản hồi qua TCP/HTTP, nó hoặc các thiết bị mạng xung quanh sẽ sinh ra các thông báo lỗi ICMP để báo hiệu sự cố:
+
+1. icmpInMsgs \& icmpOutMsgs: Chúng tăng lên khi hệ thống mạng liên tục trao đổi các thông báo lỗi do quá tải.
+
+2\. icmpInDestUnreachs \& icmpOutDestUnreachs: Biến icmpOutDestUnreachs tăng đột biến khi các cổng của máy chủ nạn nhân bị chiếm dụng hoàn toàn, khiến nó phải gửi thông báo từ chối kết nối mới.
+
+3\. icmpInEchos \& icmpOutEchoReps: Chúng biến động mạnh khi hệ thống kiểm tra sự sống còn của máy chủ (ping) trong lúc máy chủ đang bị treo hoặc phản hồi chậm chạp
+
+
+
+Nhận định: Khi máy chủ bị quá tải bởi các yêu cầu HTTP từ DOSHTTP, nó không thể xử lý tiếp và mạng phải phản hồi bằng các thông báo lỗi. Nhóm tác giả đã định nghĩa rõ rằng 6 biến nhóm ICMP được thu thập để theo dõi "số lượng gói tin đã gửi và nhận và tổng số lỗi được tạo ra". Các biến như icmpInDestUnreachs (thông báo lỗi đích không thể truy cập) sẽ có sự thay đổi rõ rệt khi máy chủ từ chối phục vụ lưu lượng mới.
+
+
+
+**Công cụ Slowloris script / ActivePerl** (Tác động lên nhóm TCP - 8 biến) Tấn công Slowloris không dùng khối lượng lớn mà gửi các HTTP header cực chậm và không bao giờ hoàn thành để "treo" các kết nối. Nhóm TCP ghi nhận sự biến đổi thông qua các trạng thái duy trì kết nối bất thường:
+
+1. tcpCurrEstab: Biến này tăng lên mức trần (đạt giới hạn tối đa của máy chủ) và duy trì liên tục ở mức cao đó, phản ánh việc toàn bộ socket bị chiếm dụng. Đây là dấu hiệu nhận biết rõ nhất của Slowloris.
+
+2\. tcpPassiveOpens: Tăng mạnh khi kẻ tấn công liên tục khởi tạo hàng nghìn kết nối mới ban đầu.
+
+3\. tcpInSegs: Trái ngược với tấn công ngập lụt, biến này có xu hướng giảm hoặc thấp hơn bình thường (negative deviation) do kết nối bị treo lại, không có dữ liệu mới nào được gửi hay nhận thêm.
+
+4\. tcpOutSegs: Giảm mạnh do máy chủ bị "đóng băng" và không thể gửi dữ liệu ra ngoài.
+
+5\. tcpOutRsts: Tăng cao do máy chủ buộc phải từ chối các kết nối mới khi đã cạn kiệt tài nguyên socket.
+
+6\. tcpAttemptFails: Tăng vọt khi các nửa kết nối bị treo và rớt do quá thời gian chờ (timeout).
+
+7\. tcpEstabResets: Gia tăng khi hệ thống hoặc tường lửa nỗ lực ngắt các kết nối bị treo quá lâu.
+
+8\. tcpActiveOpens: Thường phản ánh các nỗ lực kết nối ra ngoài của máy chủ, có thể giảm do máy chủ hết tài nguyên
+
+
+
+Nhận định: Do không dùng băng thông lớn, các biến Interface không thay đổi nhiều. Thay vào đó, tác giả định nghĩa 8 biến TCP để theo dõi "bảng kết nối và trạng thái của kết nối" ở tầng giao vận. Công cụ Slowloris khiến biến tcpCurrEstab (số lượng kết nối đang duy trì ở trạng thái ESTABLISHED) và tcpPassiveOpens (chuyển sang trạng thái chờ SYN) biến đổi mạnh do hàng ngàn phiên kết nối bị treo cứng.
+
+
+
+
+
+**Công cụ HttpDosTool4.0 \& THC-Hydra** (Tác động lên nhóm UDP - 4 biến) Bên cạnh việc quét mật khẩu (Brute Force) và tấn công thân HTTP chậm (Slowpost), sự biến đổi của nhóm UDP thường thể hiện rõ nhất khi xảy ra việc cạn kiệt tài nguyên hoặc quét các cổng ngẫu nhiên khiến hệ thống không thể xử lý các dịch vụ dựa trên UDP (như DNS, NTP):
+
+1. udpInDatagrams \& udpOutDatagrams: Chúng ghi nhận sự thay đổi bất thường về lưu lượng UDP, có thể là sự suy giảm do máy chủ đang bận xử lý Brute Force/Slowpost nên không thể xử lý các gói tin UDP hợp lệ.
+
+2\. udpNoPorts: Biến này tăng rất mạnh do kẻ tấn công thường rà quét hoặc gửi dữ liệu rác vào các cổng ngẫu nhiên đóng kín để làm tiêu hao năng lực xử lý của máy chủ.
+
+3\. udpInErrors: Biến này gia tăng vì máy chủ đã bị vắt kiệt tài nguyên CPU/RAM bởi Slowpost hoặc Brute Force, dẫn đến không thể xử lý kịp các datagram UDP đến.
+
+
+
+Nhận định: Cả hai công cụ này đều nhắm vào việc vắt kiệt tài nguyên xử lý của tầng ứng dụng (CPU, RAM xử lý mã nguồn PHP/Apache). Khi máy chủ bận rộn xử lý các đăng nhập sai hoặc các header chậm, nó mất khả năng phản hồi các giao thức nền khác. Để theo dõi sự kiệt quệ tài nguyên gián tiếp này, nhóm tác giả sử dụng 4 biến UDP, trong đó biến udpInErrors theo dõi các datagram bị lỗi "do các lý do khác ngoài việc thiếu ứng dụng ở cổng đích" (như tràn bộ nhớ RAM hoặc CPU quá tải không xử lý kịp).
+
+
 
